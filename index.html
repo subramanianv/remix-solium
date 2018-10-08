@@ -1,8 +1,60 @@
 <html>
   <head></head>
+  <style>
+    body {
+      font: "14px/1.5 Lato,Helvetica Neue, Helvetica, Arial, sans-serif";
+    }
+    .headers {
+      font-weight: bold;
+      margin-bottom: 8.5px;
+      margin-left:1px;
+      margin-top:13px;
+      font-size: 1.01em;
+    }
+    input[type=button] {
+      border-radius: 3px;
+      border: none;
+      margin-top:8px;
+    }
+    .errorItem {
+      background-color: hsla(44, 100%, 50%, .5);
+      font-size: 12px;
+      margin-bottom:12px;
+      padding-left:10px;
+      padding-top:7px;
+      font-family: monospace;
+      white-space: monospace;
+      padding-bottom: 8px;
+      padding-right: 1px;
+      border-radius: 3px;
+      line-height: 20px;
+
+
+    }
+    #errors {
+      list-style: none;
+      padding-inline-start:1px;
+      cursor: pointer;
+    }
+  </style>
   <body>
+    <script src = "solium-browser-bundle.js"></script>
     <script src="build/bundle.js"></script>
-    Current Contract : <p id="contract_name"></p>
-    <button id="analyse_button">Analyse</button><button id="fix_button">Fix</button>
+    <div style="display:block;margin:8px;">
+      <div style="font-family: Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;">
+        <div class="headers">Solium</div>
+          <div style="padding:7px;background-color: rgba(0, 255, 33, 0.2); font-size: 14px;">
+            Solium analyzes your Solidity code for style & security issues and fixes them.
+          </div>
+        <div class="headers">Loaded Configuration</div>
+        <textarea rows="8" style="width: 100%; padding:7px;background-color: rgba(100, 100, 100, 0.2); font-size: 14px;" id="configuration"></textarea>
+        <input type="button" id = "lintButton" value="Lint" style="background-color:hsla(0, 82%, 82%, .5); min-height:25px;min-width:70px;font-size:12px;">
+
+        <div>
+          <ul id="errors"></ul>
+        </div>
+      </div>
+
+    </div>
   </body>
 </html>

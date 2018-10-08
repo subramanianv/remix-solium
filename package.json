@@ -15,6 +15,7 @@
     "watchify": "^3.11.0"
   },
   "dependencies": {
-    "solium": "^1.1.8"
+    "mustache": "^3.0.0",
+    "solium": "git+https://github.com/duaraghav8/Solium.git#browserify"
   }
 }

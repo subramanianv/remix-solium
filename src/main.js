@@ -1,5 +1,18 @@
+var mustache = require('mustache');
+var Solium = window.solium;
 var id = 1;
 var callbacks = {};
+var config = {
+  "extends": "solium:recommended",
+  "plugins": ["security"],
+  "rules": {
+    "quotes": ["error", "double"],
+    "double-quotes": [2],   // returns a rule deprecation warning
+    "pragma-on-top": 1
+  },
+  "options": { "returnInternalIssues": true }
+}
+
 function dispatch(action, key, type, args, callback) {
   _id = id
   callbacks[_id] = callback;
@@ -12,8 +25,9 @@ function dispatch(action, key, type, args, callback) {
   }), '*');
   id++;
 }
-
+//
 function receiveMessage (event) {
+
   var data = JSON.parse(event.data);
   if (data.action === 'notification') {
       console.log(event);
@@ -30,24 +44,30 @@ function receiveMessage (event) {
   }
 }
 
+function soliumLint(code, config) {
+  return Solium.lint(code, config)
+}
+
 function fixContract() {
   console.log('fix contract');
 }
 
-function analyseContract() {
-  console.log('ac');
+let errorsTemplate = '{{#errors}}<li class="errorItem">{{ruleName}} {{line}}:{{column}} {{message}}</li>{{/errors}}'
+
+function lintContract() {
+  dispatch('request', 'editor', 'getCurrentFile', [], (err, files) => {
+    if(files && files.length > 0 ) {
+      dispatch('request', 'editor', 'getFile', [files[0]], (err, contents) => {
+        var errors = soliumLint(contents[0], config);
+        document.getElementById("errors").innerHTML = mustache.render(errorsTemplate, {errors:errors});
+      });
+    }
+  })
 }
 
 window.addEventListener('message', receiveMessage, false);
-
+//
 window.onload = function () {
-  document.getElementById('fix_button').addEventListener('click', fixContract);
-  document.getElementById('analyse_button').addEventListener('click', analyseContract);
-
-  dispatch('request', 'editor', 'getCurrentFile', [], function (err, file) {
-    document.getElementById('contract_name').innerHTML = file[0];
-    dispatch('request', 'editor', 'getFile', file, function (err, content) {
-      console.log(content);
-    });
-  });
+  document.getElementById('lintButton').addEventListener('click', lintContract);
+  document.getElementById('configuration').value = JSON.stringify(config, null, 2);
 }
