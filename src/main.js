@@ -171,6 +171,7 @@ window.onload = function () {
             e.filename = r.filename;
             return e;
           });
+          dispatch('request', 'editor', 'setFile', [r.filename, results.fixedSourceCode], function(){});
           setCompilationHeading(makeCompilationHeading({ filename: r.filename, errors: errors || [] }));
           setResults(errors, RESULTS_TEMPLATE);
         }
