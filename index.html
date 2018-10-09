@@ -1,9 +1,6 @@
 <html>
   <head></head>
   <style>
-    body {
-      font: "14px/1.5 Lato,Helvetica Neue, Helvetica, Arial, sans-serif";
-    }
     .headers {
       font-weight: bold;
       margin-bottom: 8.5px;
@@ -20,7 +17,7 @@
       min-width:70px;
       font-size:12px;
     }
-    .errorItem {
+    .item {
       background-color: hsla(44, 100%, 50%, .5);
       font-size: 12px;
       margin-bottom:12px;
@@ -32,13 +29,31 @@
       padding-right: 1px;
       border-radius: 3px;
       line-height: 20px;
-
-
     }
-    #errors {
+    #resultHeading {
+      background-color: hsla(240, 64%, 68%, .5);
+      margin-top: 10px;
+      visibility: hidden;
+    }
+    #results {
       list-style: none;
       padding-inline-start:1px;
       cursor: pointer;
+    }
+
+    #configuration  {
+      width: 100%;
+      padding:7px;
+      background-color: rgba(100, 100, 100, 0.2);
+      font-size: 14px;
+      font-family: monospace;
+    }
+    #configButtons {
+      font-family: monospace;
+      margin-left: 8px;
+    }
+    #configButtons a {
+      padding-right: 5px;
     }
   </style>
   <body>
@@ -50,13 +65,12 @@
           <div style="padding:7px;background-color: rgba(0, 255, 33, 0.2); font-size: 14px;">
             Solium analyzes your Solidity code for style & security issues and fixes them.
           </div>
-        <div class="headers">Loaded Configuration</div>
-        <textarea rows="8" style="width: 100%; padding:7px;background-color: rgba(100, 100, 100, 0.2); font-size: 14px;" id="configuration"></textarea>
+        <div class="headers">.soliumrc.json - Loaded from config folder<span id="configButtons"><a id="configSave" href="#">save</a> <a id="configReload" href="#">reload</a></span></div>
+        <textarea rows="8" id="configuration"></textarea>
         <input type="button" id = "lintButton" value="Lint">
         <input type="button" id = "fixButton" value="Lint and Fix">
-        <div>
-          <ul id="errors"></ul>
-        </div>
+        <div class = "item" id="resultHeading"></div>
+        <ul id="results"></ul>
       </div>
 
     </div>
