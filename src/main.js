@@ -24,6 +24,7 @@ window.highlight = function(line, column, filename) {
 }
 
 function cleanupResults() {
+  window.extension.call('editor', 'discardHighlight', [], console.log);
   document.getElementById('resultHeading').style.visibility = 'hidden';
   document.getElementById('results').style.visibility = 'hidden';
   document.getElementById('results').innerHTML = '';
