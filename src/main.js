@@ -1,9 +1,12 @@
 var mustache = require('mustache');
+var currentHightlight;
 var Solium = window.solium;
 var id = 1;
 var callbacks = {};
 var CONFIG_FILE = '.soliumrc.json';
-let RESULTS_TEMPLATE = '{{#items}}<li class="item">{{filename}}:{{line}}:{{column}}: {{ruleName}} {{message}}</li>{{/items}}'
+window.extension = new window.RemixExtension()
+let RESULTS_TEMPLATE = '{{#items}}<li class="item" onclick="window.highlight({{line}}, {{column}}, \'{{filename}}\')">{{filename}}:{{line}}:{{column}}: {{ruleName}} {{message}}</li>{{/items}}'
+
 var defaultConfig = {
   "extends": "solium:recommended",
   "plugins": ["security"],
@@ -15,35 +18,10 @@ var defaultConfig = {
   "options": { "returnInternalIssues": false }
 }
 
-function dispatch(action, key, type, args, callback) {
-  _id = id
-  callbacks[_id] = callback;
-  window.parent.postMessage(JSON.stringify({
-    action: action,
-    key: key,
-    type: type,
-    value: args,
-    id: _id
-  }), '*');
-  id++;
-}
-//
-function receiveMessage (event) {
-
-  var data = JSON.parse(event.data);
-  if (data.action === 'notification') {
-      console.log(event);
-  }
-  if (data.action === 'response') {
-      var fn = callbacks[data.id];
-      delete callbacks[data.id];
-      if(typeof fn === 'function') {
-        if(data.error) {
-          return fn(data.error);
-        }
-        fn(null, data.value);
-      }
-  }
+window.highlight = function(line, column, filename) {
+  var arg = { start: {line:line,column:0}, end: {line: line, column:column}}
+  arg = JSON.stringify(arg);
+  window.extension.call('editor', 'highlight', [arg, filename, "#FF9F33"], console.log);
 }
 
 function cleanupResults() {
@@ -64,13 +42,13 @@ function setResults(items, template, id = 'results') {
 }
 
 function getCurrentFileContent(cb) {
-  dispatch('request', 'editor', 'getCurrentFile', [], (e, files) => {
+  window.extension.call('editor', 'getCurrentFile', [], (e, files) => {
     if(e) {
       return cb(e);
     } else if(files && !files[0]) {
       return cb('No file is open');
     } else {
-      dispatch('request', 'editor', 'getFile', [files[0]], (e, file) => {
+      window.extension.call('editor', 'getFile', [files[0]], (e, file) => {
         if(e) {
           return cb(e);
         } else {
@@ -112,15 +90,15 @@ function makeCompilationHeading(result) {
     return e;
   }
 }
-window.addEventListener('message', receiveMessage, false);
+
 //
 window.onload = function () {
-  dispatch('request', 'config', 'getConfig', [CONFIG_FILE], (e, rc) => {
+  window.extension.call('config', 'getConfig', [CONFIG_FILE], (e, rc) => {
     if (e) {
       setCompilationHeading(e.toString());
     }
     else if(rc && !rc[0]) {
-      dispatch('request', 'config', 'setConfig', [CONFIG_FILE, JSON.stringify(defaultConfig, null, 2)], (e, r) => {
+      window.extension.call('config', 'setConfig', [CONFIG_FILE, JSON.stringify(defaultConfig, null, 2)], (e, r) => {
         document.getElementById('configuration').value = JSON.stringify(defaultConfig, null, 2);
       })
     } else {
@@ -171,7 +149,7 @@ window.onload = function () {
             e.filename = r.filename;
             return e;
           });
-          dispatch('request', 'editor', 'setFile', [r.filename, results.fixedSourceCode], function(){});
+          window.extension.call('editor', 'setFile', [r.filename, results.fixedSourceCode], function(){});
           setCompilationHeading(makeCompilationHeading({ filename: r.filename, errors: errors || [] }));
           setResults(errors, RESULTS_TEMPLATE);
         }
@@ -181,7 +159,7 @@ window.onload = function () {
     document.getElementById('configSave').addEventListener('click', (e) => {
       cleanupResults();
       var config = document.getElementById('configuration').value;
-      dispatch('request', 'config', 'setConfig', [CONFIG_FILE, config], (e, config) => {
+      window.extension.call('config', 'setConfig', [CONFIG_FILE, config], (e, config) => {
         if (e) {
           setCompilationHeading(e.toString());
         };
@@ -190,7 +168,7 @@ window.onload = function () {
 
     document.getElementById('configReload').addEventListener('click', (e) => {
       cleanupResults();
-      dispatch('request', 'config', 'getConfig', [CONFIG_FILE], (e, config) => {
+      window.extension.call('config', 'getConfig', [CONFIG_FILE], (e, config) => {
         if (e) {
           setCompilationHeading(e.toString());
         } else {
