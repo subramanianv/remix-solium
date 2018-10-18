@@ -1,5 +1,4 @@
 var mustache = require('mustache');
-var currentHightlight;
 var Solium = window.solium;
 var id = 1;
 var callbacks = {};
@@ -59,16 +58,22 @@ function getCurrentFileContent(cb) {
   })
 }
 
-function fixContract(contents, config) {
+function fixContract(contents, config, callback) {
   if (config.options) {
     config.options.autofix = true;
   } else {
     config.options = { autofix : true };
   }
-  return Solium.lint(contents, config);
+  var results;
+  try {
+    results = Solium.lint(contents, config);
+    return callback(null, results);
+  } catch(e) {
+    callback(e);
+  }
 }
 
-function lintContract(contents, config) {
+function lintContract(contents, config, callback) {
   if (config.options) {
     config.options.autofix = false;
   } else {
@@ -76,7 +81,14 @@ function lintContract(contents, config) {
       autofix: false
     }
   }
-  return Solium.lint(contents, config);
+
+  var results;
+  try {
+    results = Solium.lint(contents, config);
+    return callback(null, results);
+  } catch(e) {
+    callback(e);
+  }
 }
 
 function makeCompilationHeading(result) {
@@ -119,13 +131,18 @@ window.onload = function () {
           } catch(e) {
             return setCompilationHeading(`config error: ${e.toString()}`);
           }
-          var results = lintContract(r.file, config);
-          var errors = results.map((e) => {
-            e.filename = r.filename;
-            return e;
+          var results = lintContract(r.file, config, (err, results) => {
+            if (err) {
+              return setCompilationHeading(`Solium error: ${err.toString()}`);
+            }
+            var errors = results.map((e) => {
+              e.filename = r.filename;
+              return e;
+            });
+            setCompilationHeading(makeCompilationHeading({ lint: true, filename: r.filename, errors: errors || [] }));
+            setResults(errors, RESULTS_TEMPLATE);
           });
-          setCompilationHeading(makeCompilationHeading({ lint: true, filename: r.filename, errors: errors || [] }));
-          setResults(errors, RESULTS_TEMPLATE);
+
         }
       });
     });
@@ -144,14 +161,18 @@ window.onload = function () {
           } catch(e) {
             return setCompilationHeading(`config error: ${e.toString()}`);
           }
-          var results = fixContract(r.file, config);
-          var errors = results.errorMessages.map((e) => {
-            e.filename = r.filename;
-            return e;
+          var results = fixContract(r.file, config, (err, results) => {
+            if (error) {
+              return setCompilationHeading(`Solium returned a error ${err.toString()}`);
+            }
+            var errors = results.errorMessages.map((e) => {
+              e.filename = r.filename;
+              return e;
+            });
+            window.extension.call('editor', 'setFile', [r.filename, results.fixedSourceCode], function(){});
+            setCompilationHeading(makeCompilationHeading({ filename: r.filename, errors: errors || [] }));
+            setResults(errors, RESULTS_TEMPLATE);
           });
-          window.extension.call('editor', 'setFile', [r.filename, results.fixedSourceCode], function(){});
-          setCompilationHeading(makeCompilationHeading({ filename: r.filename, errors: errors || [] }));
-          setResults(errors, RESULTS_TEMPLATE);
         }
       });
     });
