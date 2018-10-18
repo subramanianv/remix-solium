@@ -162,7 +162,7 @@ window.onload = function () {
             return setCompilationHeading(`config error: ${e.toString()}`);
           }
           var results = fixContract(r.file, config, (err, results) => {
-            if (error) {
+            if (err) {
               return setCompilationHeading(`Solium returned a error ${err.toString()}`);
             }
             var errors = results.errorMessages.map((e) => {
