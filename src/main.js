@@ -18,7 +18,7 @@ var defaultConfig = {
 }
 
 window.highlight = function(line, column, filename) {
-  var arg = { start: {line:line,column:0}, end: {line: line, column:column}}
+  var arg = { start: {line:line-1,column:0}, end: {line: line-1, column:column}}
   arg = JSON.stringify(arg);
   window.extension.call('editor', 'highlight', [arg, filename, "#FF9F33"], console.log);
 }
