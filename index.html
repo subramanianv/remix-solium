@@ -55,6 +55,10 @@
     #configButtons a {
       padding-right: 5px;
     }
+    #footer {
+      font-size: 12px;
+      font-family: monospace;
+    }
   </style>
   <body>
     <script src = "solium-browser-bundle.js"></script>
@@ -67,11 +71,15 @@
             Solium analyzes your Solidity code for style & security issues and fixes them.
           </div>
         <div class="headers">.soliumrc.json - Loaded from config folder<span id="configButtons"><a id="configSave" href="#">save</a> <a id="configReload" href="#">reload</a></span></div>
+
         <textarea rows="8" id="configuration"></textarea>
         <input type="button" id = "lintButton" value="Lint">
         <input type="button" id = "fixButton" value="Fix">
         <div class = "item" id="resultHeading"></div>
         <ul id="results"></ul>
+        <div id="footer">
+          If you have new feature requests or bugs, Please open a PR at <a href="https://github.com/subramanianv/remix-solium">https://github.com/subramanianv/remix-solium</a> - copy and open in a new tab
+        </div>
       </div>
 
     </div>
